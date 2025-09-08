@@ -1,1 +1,1 @@
-# Docker Containerization Notes
+# Docker Containerization & AWS EC2 Deployment Notes
