@@ -1,21 +1,18 @@
-# Deploying a Docker Container on Amazon EC2
+# Deploying a Docker Container on Amazon EC2 Inastance
 
 ## Step-by-Step Guide
 
 ### Step 1: Create an EC2 Instance
 
-1. Go to the **AWS EC2 Dashboard** → **Launch Instance**.
-2. Choose an **Amazon Linux 2023 AMI**.
-3. Select **instance type** (e.g., `t2.micro` for free tier).
-4. Configure **security group (SG)**:
-
-   * Allow **SSH** (port 22) from your IP.
-   * Allow the **port your app uses** (e.g., 8000) from anywhere (`0.0.0.0/0`) so it’s publicly accessible.
-5. **Launch instance** and **download the `.pem` key file** for SSH connection.
+1. Go to the **AWS EC2 Dashboard** → **Launch a very very simple Instance**.
+2. Configure **security group (SG)**:
+   * Allow **SSH** (port 22) from your IP in the SG inbound rules
+   * Allow the **port the docker image is created on** (e.g., custome TCP @ PORT 8000) from anywhere (`0.0.0.0/0`) so it’s publicly accessible. in the SG inbound rules.
+3. **Launch instance** and **download the `.pem` key file** for SSH connection.
 
 ### Step 2: Connect to EC2 via SSH
 
-1. Open terminal (or PowerShell).
+1. Open terminal.
 2. Move to the folder where your `.pem` file is located.
 3. Connect using SSH:
 
@@ -35,7 +32,7 @@ sudo yum update -y
 1. Install Docker and dependencies:
 
    ```bash
-   sudo yum install docker -y
+   sudo yum install docker
    ```
 2. Start Docker service:
 
@@ -50,7 +47,7 @@ sudo yum update -y
 
 ### Step 5: Log in to Docker Hub
 
-1. Login using your Docker Hub credentials:
+1. Login using your Docker Hub credentials, the email and password:
 
    ```bash
    sudo docker login
@@ -62,11 +59,11 @@ sudo yum update -y
 1. Pull your Docker image and run it:
 
    ```bash
-   sudo docker run --restart=always -p 8000:8000 your-docker-username/your-image-name
+   sudo docker run --restart=always -p 8000:8000 your-docker-hub-username/your-image-name
    ```
 
    * `--restart=always` → ensures container restarts if EC2 reboots.
-   * `-p 8000:8000` → maps EC2 port 8000 to container port 8000.
+   * `-p 8000:8000` → 8000:8000 is what we used while creating docker image, we will use that same thing here.
 2. Check running containers:
 
    ```bash
@@ -86,13 +83,10 @@ sudo yum update -y
   sudo docker rm <container_id_or_name>
   ```
 
-### Step 8: Verify Public Access
+### Step 8: Access the website using the EC2 instance's public IP
 
-1. Get EC2 public IP:
+1. Get EC2 public IP from AWS EC2 dashboard
 
-   ```bash
-   curl http://checkip.amazonaws.com
-   ```
 2. Open your browser and go to:
 
    ```
@@ -101,21 +95,16 @@ sudo yum update -y
 
    → Your Dockerized app should be accessible.
 
+
+
+
 ### Step 9: Common Errors & Fixes
 
-1. **Command not found (Windows issues)**
-
-   * Windows CMD doesn’t recognize `ls` or `chmod`. Use `dir` or do it inside EC2.
-
-2. **Docker permission denied**
+1. **Docker permission denied**
 
    * Always run Docker commands with `sudo` or add your user to the Docker group.
 
-3. **Docker login unauthorized**
-
-   * Use the correct Docker Hub credentials or a Personal Access Token (PAT).
-
-4. **Port already allocated**
+2. **Port already allocated**
 
    * Stop and remove any container using that port:
 
@@ -124,7 +113,11 @@ sudo yum update -y
      sudo docker rm <container_id>
      ```
 
-5. **MongoDB connection errors**
+3. **MongoDB connection errors**
 
-   * Make sure your EC2 public IP is whitelisted in MongoDB Atlas.
+   * Make sure your EC2 public IP is whitelisted in MongoDB Atlas cluster's network access.
    * Use SSL/TLS connection if required by your DB.
+
+4. **http instead of https**
+5. **:8000 in the ec2 public IP**
+6. **Appropriate inbound rules in the EC2 instance**
